@@ -29,6 +29,23 @@
   align-items: center;
 }
 
+.btn-export {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-export:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 87, 108, 0.4);
+}
+
 .btn-save {
   padding: 12px 24px;
   background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);

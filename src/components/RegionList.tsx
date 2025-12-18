@@ -8,6 +8,7 @@ import {
   deleteRegion
 } from '../utils/regionStorage';
 import { Toast } from './Toast';
+import { downloadHtml } from '../utils/exportHtml';
 import './RegionList.css';
 
 // Count all nodes recursively (including root)
@@ -118,19 +119,36 @@ export const RegionList: React.FC<RegionListProps> = ({ onSelectRegion }) => {
     const currentRegions = loadRegions();
     saveRegions(currentRegions);
     
-    // Copy URL to clipboard for sharing
+    // Copy URL to clipboard for sharing (now uses short share ID)
     const currentUrl = window.location.href;
     navigator.clipboard.writeText(currentUrl).then(() => {
       setToast({
-        message: 'All branches saved and synced! URL copied to clipboard - share this link for real-time sync.',
+        message: 'All branches saved and synced! Short URL copied to clipboard - share this link for real-time sync.',
         type: 'success'
       });
     }).catch(() => {
       setToast({
-        message: 'All branches saved and synced! Share this URL for real-time sync: ' + currentUrl,
+        message: 'All branches saved and synced! Share this short URL for real-time sync: ' + currentUrl,
         type: 'success'
       });
     });
+  };
+
+  const handleExportHtml = () => {
+    try {
+      const currentRegions = loadRegions();
+      downloadHtml(currentRegions);
+      setToast({
+        message: 'Organization chart exported to HTML file successfully!',
+        type: 'success'
+      });
+    } catch (error) {
+      console.error('Failed to export HTML:', error);
+      setToast({
+        message: 'Failed to export HTML file. Please try again.',
+        type: 'error'
+      });
+    }
   };
 
   const handleCancel = () => {
@@ -146,6 +164,9 @@ export const RegionList: React.FC<RegionListProps> = ({ onSelectRegion }) => {
         <div className="header-actions">
           {!showAddForm && !editingId && (
             <>
+              <button className="btn-export" onClick={handleExportHtml} title="Export to HTML">
+                📥 Export HTML
+              </button>
               <button className="btn-save" onClick={handleSave}>
                 💾 Save All
               </button>

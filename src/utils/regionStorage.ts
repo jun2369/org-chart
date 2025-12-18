@@ -1,7 +1,7 @@
 import { Region, OrgNode } from '../types';
 import { generateId } from './storage';
 import { initialOrgData } from '../data/initialData';
-import { loadRegionsFromUrl, saveRegionsToUrl } from './urlStorage';
+import { loadRegionsFromUrl } from './urlStorage';
 import {
   getShareIdFromUrl,
   saveToSharedStorage,
@@ -60,7 +60,7 @@ export const loadRegions = (): Region[] => {
   return [defaultRegion];
 };
 
-// Save all regions to localStorage, shared storage, and URL
+// Save all regions to localStorage and shared storage (use share ID for short URLs)
 export const saveRegions = (regions: Region[]): void => {
   try {
     // Save to localStorage
@@ -71,14 +71,14 @@ export const saveRegions = (regions: Region[]): void => {
     if (shareId) {
       saveToSharedStorage(shareId, regions);
     } else {
-      // If no share ID, create one and update URL
+      // If no share ID, create one and update URL (short URL with share ID)
       const newShareId = generateShareId();
       saveToSharedStorage(newShareId, regions);
       updateUrlWithShareId(newShareId);
     }
     
-    // Also save to URL hash for snapshot sharing (backup)
-    saveRegionsToUrl(regions);
+    // Don't save to URL hash to keep URLs short - use share ID instead
+    // If user needs snapshot sharing, they can use the share ID link
   } catch (error) {
     console.error('Failed to save regions:', error);
   }
