@@ -76,25 +76,8 @@ export const OrgNodeComponent: React.FC<OrgNodeComponentProps> = ({
       }
     });
     
-    // Check if each department group should be horizontal
-    // Rule 1: If parent has > 2 children, arrange them horizontally
-    // Rule 2: If all nodes in the group have <= 2 children, arrange horizontally
-    const shouldBeHorizontal: { [key: string]: boolean } = {};
-    Object.entries(groups).forEach(([dept, children]) => {
-      // Rule 1: If parent has more than 2 children, arrange horizontally
-      const parentHasManyChildren = children.length > 2;
-      
-      // Rule 2: If all nodes in this department have <= 2 children, arrange horizontally
-      const allHaveFewChildren = children.every(child => {
-        const childCount = child.children ? child.children.length : 0;
-        return childCount <= 2;
-      });
-      
-      // Apply horizontal if either rule is met
-      shouldBeHorizontal[dept] = (parentHasManyChildren || allHaveFewChildren) && children.length > 0;
-    });
-    
-    return { groups, noDepartment, shouldBeHorizontal };
+    // No automatic arrangement - users can drag and drop to arrange as they wish
+    return { groups, noDepartment };
   }, [node.children, hasChildren]);
 
   const handleNodeClick = (e: React.MouseEvent) => {
@@ -286,38 +269,35 @@ export const OrgNodeComponent: React.FC<OrgNodeComponentProps> = ({
           <div className="org-node-children">
             {groupedChildren ? (
               <>
-                {/* Render grouped children by department */}
-                {Object.entries(groupedChildren.groups).map(([dept, children]) => {
-                  const isHorizontal = groupedChildren.shouldBeHorizontal[dept];
-                  return (
-                    <div key={dept} className={`department-group ${isHorizontal ? 'department-group-horizontal' : ''}`}>
-                      {children.map((child, index) => (
-                        <React.Fragment key={child.id}>
-                          {index === 0 && <div className="connector-line"></div>}
-                          <OrgNodeComponent
-                            node={child}
-                            selectedId={selectedId}
-                            onSelect={onSelect}
-                            onAction={onAction}
-                            level={level + 1}
-                            onDragStart={onDragStart}
-                            onDragEnd={onDragEnd}
-                            onDragOver={onDragOver}
-                            onDrop={onDrop}
-                            dragTargetId={dragTargetId}
-                            dragPosition={dragPosition}
-                            isDragging={isDragging}
-                            draggedNodeId={draggedNodeId}
-                          />
-                        </React.Fragment>
-                      ))}
-                    </div>
-                  );
-                })}
+                {/* Render grouped children by department - default vertical, user can drag to rearrange */}
+                {Object.entries(groupedChildren.groups).map(([dept, children]) => (
+                  <div key={dept} className="department-group">
+                    {children.map((child, index) => (
+                      <React.Fragment key={child.id}>
+                        {index === 0 && <div className="connector-line"></div>}
+                        <OrgNodeComponent
+                          node={child}
+                          selectedId={selectedId}
+                          onSelect={onSelect}
+                          onAction={onAction}
+                          level={level + 1}
+                          onDragStart={onDragStart}
+                          onDragEnd={onDragEnd}
+                          onDragOver={onDragOver}
+                          onDrop={onDrop}
+                          dragTargetId={dragTargetId}
+                          dragPosition={dragPosition}
+                          isDragging={isDragging}
+                          draggedNodeId={draggedNodeId}
+                        />
+                      </React.Fragment>
+                    ))}
+                  </div>
+                ))}
                 
-                {/* Render children without department */}
+                {/* Render children without department - default vertical, user can drag to rearrange */}
                 {groupedChildren.noDepartment.length > 0 && (
-                  <div className={`department-group ${groupedChildren.noDepartment.length > 2 ? 'department-group-horizontal' : ''}`}>
+                  <div className="department-group">
                     {groupedChildren.noDepartment.map((child, index) => (
                       <React.Fragment key={child.id}>
                         {index === 0 && <div className="connector-line"></div>}

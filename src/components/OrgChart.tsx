@@ -15,7 +15,8 @@ import {
   moveNodeDown,
   moveToSiblingChild,
   moveToParentLevel,
-  moveNodeWithChildrenPromotion
+  moveNodeWithChildrenPromotion,
+  reorderSibling
 } from '../utils/storage';
 import {
   loadRegions,
@@ -255,7 +256,6 @@ export const OrgChart: React.FC<OrgChartProps> = ({ regionId, onBack }) => {
             onDrop={(targetNodeId, position) => {
               if (!orgData || !draggedNodeId || draggedNodeId === targetNodeId) return;
               
-              // Prevent dropping on own children
               const draggedNode = findNodeById(orgData, draggedNodeId);
               if (!draggedNode) return;
               
@@ -276,40 +276,30 @@ export const OrgChart: React.FC<OrgChartProps> = ({ regionId, onBack }) => {
                 return;
               }
               
-              // Check department restriction
-              const draggedDept = getDepartment(draggedNode);
-              if (draggedDept) {
-                // If dragged node has a department, check target
-                let targetNode: OrgNode | null = null;
-                if (position === 'above') {
-                  const targetParent = findParentNode(orgData, targetNodeId);
-                  targetNode = targetParent;
-                } else {
-                  targetNode = findNodeById(orgData, targetNodeId);
-                }
-                
-                if (targetNode) {
-                  const targetDept = getDepartment(targetNode);
-                  // If target also has a department and it's different, prevent drop
-                  if (targetDept && targetDept !== draggedDept) {
-                    alert(`无法移动：${draggedNode.name} 属于 ${draggedDept} 部门，不能移动到 ${targetDept} 部门下`);
-                    setDraggedNodeId(null);
-                    setDragTargetId(null);
-                    setDragPosition(null);
-                    return;
-                  }
-                }
+              // Check if dragging to sibling (same parent) - use reorder instead
+              const draggedParent = findParentNode(orgData, draggedNodeId);
+              const targetParent = findParentNode(orgData, targetNodeId);
+              
+              // If both have same parent, this is a reorder operation
+              if (draggedParent && targetParent && draggedParent.id === targetParent.id) {
+                const newData = reorderSibling(
+                  orgData,
+                  draggedNodeId,
+                  targetNodeId,
+                  position === 'above' ? 'before' : 'after'
+                );
+                setOrgData(newData);
+              } else {
+                // Regular move operation - use moveNodeWithChildrenPromotion
+                const newData = moveNodeWithChildrenPromotion(
+                  orgData,
+                  draggedNodeId,
+                  targetNodeId,
+                  position
+                );
+                setOrgData(newData);
               }
               
-              // Use the new function that promotes children
-              const newData = moveNodeWithChildrenPromotion(
-                orgData,
-                draggedNodeId,
-                targetNodeId,
-                position
-              );
-              
-              setOrgData(newData);
               setDraggedNodeId(null);
               setDragTargetId(null);
               setDragPosition(null);
