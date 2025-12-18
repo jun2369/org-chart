@@ -3,7 +3,6 @@ import { OrgNode, NodeAction, NodeFormData, MoveType } from '../types';
 import { OrgNodeComponent } from './OrgNodeComponent';
 import { NodeEditForm } from './NodeEditForm';
 import { MoveNodeDialog } from './MoveNodeDialog';
-import { StatsPanel } from './StatsPanel';
 import { getDepartment } from '../utils/department';
 import {
   generateId,
@@ -62,7 +61,7 @@ export const OrgChart: React.FC<OrgChartProps> = ({ regionId, onBack }) => {
     if (orgData) {
       const regions = loadRegions();
       const updated = updateRegionOrgData(regions, regionId, orgData);
-      saveRegions(updated);
+      saveRegions(updated); // This will also save to URL
     }
   }, [orgData, regionId]);
 
@@ -204,7 +203,6 @@ export const OrgChart: React.FC<OrgChartProps> = ({ regionId, onBack }) => {
 
   return (
     <div className="org-chart-container">
-      <StatsPanel orgData={orgData} />
       
       <div className="org-chart-header">
         <button className="btn-back" onClick={onBack} title="Back to Branches">

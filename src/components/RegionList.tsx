@@ -49,6 +49,7 @@ export const RegionList: React.FC<RegionListProps> = ({ onSelectRegion }) => {
     if (formData.name.trim()) {
       const updated = addRegion(regions, formData.name.trim());
       setRegions(updated);
+      saveRegions(updated); // Save to URL
       setFormData({ name: '' });
       setShowAddForm(false);
     }
@@ -63,6 +64,7 @@ export const RegionList: React.FC<RegionListProps> = ({ onSelectRegion }) => {
     if (formData.name.trim()) {
       const updated = updateRegionName(regions, regionId, formData.name.trim());
       setRegions(updated);
+      saveRegions(updated); // Save to URL
       setEditingId(null);
       setFormData({ name: '' });
     }
@@ -100,6 +102,7 @@ export const RegionList: React.FC<RegionListProps> = ({ onSelectRegion }) => {
     if (window.confirm('Are you sure you want to delete this branch?')) {
       const updated = deleteRegion(regions, regionId);
       setRegions(updated);
+      saveRegions(updated); // Save to URL
       setToast({
         message: 'Branch deleted successfully.',
         type: 'success'
@@ -115,9 +118,18 @@ export const RegionList: React.FC<RegionListProps> = ({ onSelectRegion }) => {
     const currentRegions = loadRegions();
     saveRegions(currentRegions);
     
-    setToast({
-      message: 'All branches and organization data have been saved successfully!',
-      type: 'success'
+    // Copy URL to clipboard for sharing
+    const currentUrl = window.location.href;
+    navigator.clipboard.writeText(currentUrl).then(() => {
+      setToast({
+        message: 'All branches saved and synced! URL copied to clipboard - share this link for real-time sync.',
+        type: 'success'
+      });
+    }).catch(() => {
+      setToast({
+        message: 'All branches saved and synced! Share this URL for real-time sync: ' + currentUrl,
+        type: 'success'
+      });
     });
   };
 

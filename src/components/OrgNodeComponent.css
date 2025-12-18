@@ -179,10 +179,10 @@
 
 .department-group {
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
   position: relative;
-  gap: 0;
+  gap: 20px;
 }
 
 .connector-line {

@@ -1,11 +1,47 @@
 import { Region, OrgNode } from '../types';
 import { generateId } from './storage';
 import { initialOrgData } from '../data/initialData';
+import { loadRegionsFromUrl, saveRegionsToUrl } from './urlStorage';
+import {
+  getShareIdFromUrl,
+  saveToSharedStorage,
+  loadFromSharedStorage,
+  updateUrlWithShareId,
+  generateShareId
+} from './sharedStorage';
 
 const REGIONS_STORAGE_KEY = 'org-chart-regions';
 
-// Load all regions from localStorage
+// Load all regions from shared storage, URL, or localStorage
 export const loadRegions = (): Region[] => {
+  // First try to load from shared storage (for real-time sync)
+  const shareId = getShareIdFromUrl();
+  if (shareId) {
+    const sharedRegions = loadFromSharedStorage(shareId);
+    if (sharedRegions) {
+      // Also save to localStorage for local use
+      try {
+        localStorage.setItem(REGIONS_STORAGE_KEY, JSON.stringify(sharedRegions));
+      } catch (error) {
+        console.error('Failed to save shared data to localStorage:', error);
+      }
+      return sharedRegions;
+    }
+  }
+
+  // Second try to load from URL (for snapshot sharing)
+  const urlRegions = loadRegionsFromUrl();
+  if (urlRegions) {
+    // Also save to localStorage for local use
+    try {
+      localStorage.setItem(REGIONS_STORAGE_KEY, JSON.stringify(urlRegions));
+    } catch (error) {
+      console.error('Failed to save URL data to localStorage:', error);
+    }
+    return urlRegions;
+  }
+
+  // Fallback to localStorage
   try {
     const data = localStorage.getItem(REGIONS_STORAGE_KEY);
     if (data) {
@@ -24,10 +60,25 @@ export const loadRegions = (): Region[] => {
   return [defaultRegion];
 };
 
-// Save all regions to localStorage
+// Save all regions to localStorage, shared storage, and URL
 export const saveRegions = (regions: Region[]): void => {
   try {
+    // Save to localStorage
     localStorage.setItem(REGIONS_STORAGE_KEY, JSON.stringify(regions));
+    
+    // Save to shared storage if using share ID
+    const shareId = getShareIdFromUrl();
+    if (shareId) {
+      saveToSharedStorage(shareId, regions);
+    } else {
+      // If no share ID, create one and update URL
+      const newShareId = generateShareId();
+      saveToSharedStorage(newShareId, regions);
+      updateUrlWithShareId(newShareId);
+    }
+    
+    // Also save to URL hash for snapshot sharing (backup)
+    saveRegionsToUrl(regions);
   } catch (error) {
     console.error('Failed to save regions:', error);
   }
