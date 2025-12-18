@@ -185,6 +185,11 @@
   gap: 20px;
 }
 
+.department-group-horizontal {
+  flex-direction: row;
+  gap: 40px;
+}
+
 .connector-line {
   position: absolute;
   top: -20px;
