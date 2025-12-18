@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Region, RegionFormData } from '../types';
+import { Region, RegionFormData, OrgNode } from '../types';
 import {
   loadRegions,
   saveRegions,
@@ -9,6 +9,22 @@ import {
 } from '../utils/regionStorage';
 import { Toast } from './Toast';
 import './RegionList.css';
+
+// Count all nodes recursively (including root)
+const countAllNodes = (node: OrgNode): number => {
+  let count = 1; // Count self
+  if (node.children) {
+    node.children.forEach(child => {
+      count += countAllNodes(child);
+    });
+  }
+  return count;
+};
+
+// Get total count for a region (including all nodes)
+const getRegionTotalCount = (region: Region): number => {
+  return countAllNodes(region.orgData);
+};
 
 interface RegionListProps {
   onSelectRegion: (regionId: string) => void;
@@ -75,17 +91,17 @@ export const RegionList: React.FC<RegionListProps> = ({ onSelectRegion }) => {
     
     if (hasEmployees(region)) {
       setToast({
-        message: 'Cannot delete this region. It contains employees. Please remove all employees first.',
+        message: 'Cannot delete this branch. It contains employees. Please remove all employees first.',
         type: 'error'
       });
       return;
     }
     
-    if (window.confirm('Are you sure you want to delete this region?')) {
+    if (window.confirm('Are you sure you want to delete this branch?')) {
       const updated = deleteRegion(regions, regionId);
       setRegions(updated);
       setToast({
-        message: 'Region deleted successfully.',
+        message: 'Branch deleted successfully.',
         type: 'success'
       });
     }
@@ -100,7 +116,7 @@ export const RegionList: React.FC<RegionListProps> = ({ onSelectRegion }) => {
     saveRegions(currentRegions);
     
     setToast({
-      message: 'All regions and organization data have been saved successfully!',
+      message: 'All branches and organization data have been saved successfully!',
       type: 'success'
     });
   };
@@ -114,7 +130,7 @@ export const RegionList: React.FC<RegionListProps> = ({ onSelectRegion }) => {
   return (
     <div className="region-list-container">
       <div className="region-list-header">
-        <h1>Organization Chart - Regions</h1>
+        <h1>Organization Chart - Branches</h1>
         <div className="header-actions">
           {!showAddForm && !editingId && (
             <>
@@ -122,7 +138,7 @@ export const RegionList: React.FC<RegionListProps> = ({ onSelectRegion }) => {
                 💾 Save All
               </button>
               <button className="btn-add-region" onClick={() => setShowAddForm(true)}>
-                + Add Region
+                + Add Branch
               </button>
             </>
           )}
@@ -134,7 +150,7 @@ export const RegionList: React.FC<RegionListProps> = ({ onSelectRegion }) => {
           <div className="region-form">
             <input
               type="text"
-              placeholder="Region Name"
+              placeholder="Branch Name"
               value={formData.name}
               onChange={(e) => setFormData({ name: e.target.value })}
               onKeyPress={(e) => {
@@ -195,7 +211,10 @@ export const RegionList: React.FC<RegionListProps> = ({ onSelectRegion }) => {
               ) : (
                 <>
                   <div className="region-card-content">
-                    <h2>{region.name}</h2>
+                    <h2>
+                      {region.name}
+                      <span className="region-count"> ({getRegionTotalCount(region)})</span>
+                    </h2>
                     <p>Click to view organization chart</p>
                   </div>
                   <div className="region-card-actions">
@@ -215,7 +234,7 @@ export const RegionList: React.FC<RegionListProps> = ({ onSelectRegion }) => {
                     <button
                       className={`btn-delete ${hasEmployees(region) ? 'disabled' : ''}`}
                       onClick={() => handleDelete(region.id)}
-                      title={hasEmployees(region) ? 'Cannot delete region with employees' : 'Delete'}
+                      title={hasEmployees(region) ? 'Cannot delete branch with employees' : 'Delete'}
                       disabled={hasEmployees(region)}
                     >
                       ×

@@ -1,0 +1,150 @@
+.stats-panel {
+  position: fixed;
+  top: 100px;
+  left: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 16px;
+  min-width: 220px;
+  max-width: 280px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  z-index: 100;
+  font-size: 13px;
+}
+
+.stats-panel-header {
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.stats-panel-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.stats-section {
+  margin-bottom: 16px;
+}
+
+.stats-section:last-child {
+  margin-bottom: 0;
+}
+
+.stats-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.stats-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stats-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.stats-item:hover {
+  background: #e9ecef;
+}
+
+.stats-label {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.stats-value {
+  font-weight: 600;
+  color: #333;
+  font-size: 13px;
+}
+
+.stats-leader-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.stats-leader-name {
+  font-weight: 600;
+  color: #333;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stats-leader-position {
+  font-size: 11px;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stats-empty {
+  padding: 8px;
+  color: #999;
+  font-size: 12px;
+  text-align: center;
+  font-style: italic;
+}
+
+.stats-more {
+  padding: 6px 8px;
+  color: #999;
+  font-size: 11px;
+  text-align: center;
+  font-style: italic;
+}
+
+.stats-footer {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 2px solid #f0f0f0;
+}
+
+.stats-total {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Scrollbar styling */
+.stats-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.stats-panel::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.stats-panel::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.stats-panel::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+

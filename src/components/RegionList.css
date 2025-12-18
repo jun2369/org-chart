@@ -160,6 +160,15 @@
   margin: 0 0 8px 0;
   font-size: 24px;
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.region-count {
+  font-size: 20px;
+  font-weight: 500;
+  opacity: 0.9;
 }
 
 .region-card-content p {
