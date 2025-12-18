@@ -76,16 +76,22 @@ export const OrgNodeComponent: React.FC<OrgNodeComponentProps> = ({
       }
     });
     
-    // Check if each department group should be horizontal (if any node has <= 2 children)
+    // Check if each department group should be horizontal
+    // Rule 1: If parent has > 2 children, arrange them horizontally
+    // Rule 2: If all nodes in the group have <= 2 children, arrange horizontally
     const shouldBeHorizontal: { [key: string]: boolean } = {};
     Object.entries(groups).forEach(([dept, children]) => {
-      // Check if any node in this department has <= 2 children
-      // If so, the group can be arranged horizontally
-      const hasNodeWithFewChildren = children.some(child => {
+      // Rule 1: If parent has more than 2 children, arrange horizontally
+      const parentHasManyChildren = children.length > 2;
+      
+      // Rule 2: If all nodes in this department have <= 2 children, arrange horizontally
+      const allHaveFewChildren = children.every(child => {
         const childCount = child.children ? child.children.length : 0;
         return childCount <= 2;
       });
-      shouldBeHorizontal[dept] = hasNodeWithFewChildren && children.length > 0;
+      
+      // Apply horizontal if either rule is met
+      shouldBeHorizontal[dept] = (parentHasManyChildren || allHaveFewChildren) && children.length > 0;
     });
     
     return { groups, noDepartment, shouldBeHorizontal };
@@ -310,26 +316,30 @@ export const OrgNodeComponent: React.FC<OrgNodeComponentProps> = ({
                 })}
                 
                 {/* Render children without department */}
-                {groupedChildren.noDepartment.map((child) => (
-                  <React.Fragment key={child.id}>
-                    <div className="connector-line"></div>
-                    <OrgNodeComponent
-                      node={child}
-                      selectedId={selectedId}
-                      onSelect={onSelect}
-                      onAction={onAction}
-                      level={level + 1}
-                      onDragStart={onDragStart}
-                      onDragEnd={onDragEnd}
-                      onDragOver={onDragOver}
-                      onDrop={onDrop}
-                      dragTargetId={dragTargetId}
-                      dragPosition={dragPosition}
-                      isDragging={isDragging}
-                      draggedNodeId={draggedNodeId}
-                    />
-                  </React.Fragment>
-                ))}
+                {groupedChildren.noDepartment.length > 0 && (
+                  <div className={`department-group ${groupedChildren.noDepartment.length > 2 ? 'department-group-horizontal' : ''}`}>
+                    {groupedChildren.noDepartment.map((child, index) => (
+                      <React.Fragment key={child.id}>
+                        {index === 0 && <div className="connector-line"></div>}
+                        <OrgNodeComponent
+                          node={child}
+                          selectedId={selectedId}
+                          onSelect={onSelect}
+                          onAction={onAction}
+                          level={level + 1}
+                          onDragStart={onDragStart}
+                          onDragEnd={onDragEnd}
+                          onDragOver={onDragOver}
+                          onDrop={onDrop}
+                          dragTargetId={dragTargetId}
+                          dragPosition={dragPosition}
+                          isDragging={isDragging}
+                          draggedNodeId={draggedNodeId}
+                        />
+                      </React.Fragment>
+                    ))}
+                  </div>
+                )}
               </>
             ) : (
               /* Fallback: render children normally if grouping fails */
