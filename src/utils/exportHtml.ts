@@ -15,7 +15,27 @@ const countAllSubordinates = (node: OrgNode): number => {
   return count;
 };
 
-// Render a single node to HTML
+// Group children by department (same logic as in OrgNodeComponent)
+const groupChildrenByDepartment = (children: OrgNode[]) => {
+  const groups: { [key: string]: OrgNode[] } = {};
+  const noDepartment: OrgNode[] = [];
+  
+  children.forEach(child => {
+    const childDept = getDepartment(child);
+    if (childDept) {
+      if (!groups[childDept]) {
+        groups[childDept] = [];
+      }
+      groups[childDept].push(child);
+    } else {
+      noDepartment.push(child);
+    }
+  });
+  
+  return { groups, noDepartment };
+};
+
+// Render a single node to HTML (matching the exact layout from the app)
 const renderNodeToHtml = (node: OrgNode, level: number = 0): string => {
   const hasChildren = node.children && node.children.length > 0;
   const department = getDepartment(node);
@@ -25,8 +45,11 @@ const renderNodeToHtml = (node: OrgNode, level: number = 0): string => {
   const gradientStyle = `linear-gradient(135deg, ${color.from} 0%, ${color.to} 100%)`;
   const nodeId = `node-${node.id.replace(/[^a-zA-Z0-9]/g, '-')}`;
   
+  // Group children by department (same as in the app)
+  const groupedChildren = hasChildren && node.children ? groupChildrenByDepartment(node.children) : null;
+  
   let html = `
-    <div class="org-node-wrapper" style="margin: 0 10px;">
+    <div class="org-node-wrapper">
       <div class="org-node-container">
         ${department ? `<div class="department-label" style="color: ${departmentColor};">${department.toUpperCase()}</div>` : ''}
         <div class="org-node" style="background: ${gradientStyle};" id="${nodeId}">
@@ -43,7 +66,29 @@ const renderNodeToHtml = (node: OrgNode, level: number = 0): string => {
       
       ${hasChildren ? `
         <div class="org-node-children" id="children-${nodeId}">
-          ${node.children!.map(child => renderNodeToHtml(child, level + 1)).join('')}
+          ${groupedChildren ? `
+            ${Object.entries(groupedChildren.groups).map(([, children]) => `
+              <div class="department-group">
+                ${children.map((child, index) => `
+                  ${index === 0 ? '<div class="connector-line"></div>' : ''}
+                  ${renderNodeToHtml(child, level + 1)}
+                `).join('')}
+              </div>
+            `).join('')}
+            ${groupedChildren.noDepartment.length > 0 ? `
+              <div class="department-group">
+                ${groupedChildren.noDepartment.map((child, index) => `
+                  ${index === 0 ? '<div class="connector-line"></div>' : ''}
+                  ${renderNodeToHtml(child, level + 1)}
+                `).join('')}
+              </div>
+            ` : ''}
+          ` : `
+            ${node.children!.map((child, index) => `
+              ${index === 0 ? '<div class="connector-line"></div>' : ''}
+              ${renderNodeToHtml(child, level + 1)}
+            `).join('')}
+          `}
         </div>
       ` : ''}
     </div>
@@ -240,11 +285,19 @@ export const exportToHtml = (regions: Region[]): string => {
     
     .org-node-children {
       display: flex;
-      flex-direction: column;
-      align-items: center;
+      flex-direction: row;
+      align-items: flex-start;
       position: relative;
       padding-top: 20px;
       margin-top: 10px;
+      gap: 40px;
+    }
+    
+    .department-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
       gap: 20px;
     }
     
